@@ -30,6 +30,7 @@ class Gillespie(object):
         self.useSmoothing = kwargs.get('useSmoothing',False)
         self.numSteps = kwargs.get('numSteps',51)
         self.numProc = kwargs.get('numProc',1)
+        self.seed = kwargs.get('seed',5)
 
         if self.numProc>1:
             self.pool = Pool(self.numProc)
@@ -81,7 +82,6 @@ class Gillespie(object):
 
     def run_path(self, *parameters):
 
-        print("Process ID : {}".format(os.getpid()))
         self.timeGrid = np.linspace(0,self.T,self.numSteps)
         self.parameters = parameters[:-1]
         self.alpha0 = lambda x,y: sum([pair[1](pair[0],x,y) for pair in zip(parameters,self.propensities)])
@@ -95,8 +95,8 @@ class Gillespie(object):
         nA = self.a
         nB = self.b
 
-        seed1 = parameters[-1]+5
-        seed2 = parameters[-1]+1000000
+        seed1 = parameters[-1]+self.seed
+        seed2 = parameters[-1]+self.seed+100000
         state1 = nprandom.RandomState(seed1)
         state2 = nprandom.RandomState(seed2)
 

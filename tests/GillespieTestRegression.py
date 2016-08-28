@@ -18,6 +18,7 @@ class GillespieTestSuiteRegression(unittest.TestCase):
 
         result = my_gillespieUp.run_simulation(*parameters)
 
+
         expectedMeanA = [1260.6, 1302.3, 961.9, 541.3, 299.6, 188.6, 136.8, 124.3, 133.9, 155.0, 187.9, 244.8, 343.8,
                          491.9, 705.8, 966.2, 1214.1, 1288.5, 1057.2, 621.9, 319.8, 174.2, 125.5, 116.0, 123.4, 141.5,
                          180.1,
