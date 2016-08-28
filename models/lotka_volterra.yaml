@@ -1,0 +1,19 @@
+---
+increments:
+  - "1,-1,0"
+  - "0,1,-1"
+parameters:
+  - 2
+  - 0.002
+  - 1
+propensities:
+  - "lambda c,x,y: c*x"
+  - "lambda c,x,y: c*x*y"
+  - "lambda c,x,y: c*y"
+species:
+  - 1000
+  - 500
+number_of_paths: 10
+time_horizon: 15
+
+
