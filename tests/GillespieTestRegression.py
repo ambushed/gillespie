@@ -6,7 +6,7 @@ class GillespieTestSuiteRegression(unittest.TestCase):
 
     def testLotkaVolterra10paths15years(self):
 
-        setup = Setup(yaml_file_name="../models/lotka_volterra.yaml")
+        setup = Setup(yaml_file_name="models/lotka_volterra.yaml")
         propensities = setup.get_propensity_list()
         parameters = setup.get_parameter_list()
         species = setup.get_species()
@@ -36,7 +36,7 @@ class GillespieTestSuiteRegression(unittest.TestCase):
 
     def testLotkaVolterraAutoGrad(self):
 
-        setup = Setup(yaml_file_name="lotka_volterra.yaml")
+        setup = Setup(yaml_file_name="models/lotka_volterra.yaml")
         propensities = setup.get_propensity_list()
         parameters = setup.get_parameter_list()
         species = setup.get_species()
