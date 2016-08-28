@@ -1,1 +1,2 @@
-# Gillespie
+The folder "experiments" contains:
+

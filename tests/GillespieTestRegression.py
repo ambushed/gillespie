@@ -81,3 +81,10 @@ class GillespieTestSuiteRegression(unittest.TestCase):
 
         self.assertListEqual(aGradient, expectedGradA)
         self.assertListEqual(bGradient, expectedGradB)
+
+if __name__ == "__main__":
+    suite = unittest.TestSuite()
+    suite.addTest(GillespieTestSuiteRegression())
+    unittest.TextTestRunner().run(suite)
+
+
