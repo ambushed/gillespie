@@ -1,9 +1,12 @@
 import yaml
+import os
 
 class Setup(object):
 
     def __init__(self, yaml_file_name):
-        with open(yaml_file_name, 'r') as stream:
+
+        model_file = os.path.join(os.path.dirname(__file__), '../models/'+yaml_file_name)
+        with open(model_file, 'r') as stream:
             try:
                 self.setup = yaml.load(stream)
 

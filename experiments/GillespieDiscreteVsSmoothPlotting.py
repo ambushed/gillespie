@@ -4,7 +4,7 @@ import autograd.numpy as np
 import pylab as plt
 
 def gillespieDiscreteVsSmoothPlot():
-    setup = Setup(yaml_file_name="../models/lotka_volterra.yaml")
+    setup = Setup(yaml_file_name="lotka_volterra.yaml")
     propensities = setup.get_propensity_list()
     parameters = setup.get_parameter_list()
     species = setup.get_species()
