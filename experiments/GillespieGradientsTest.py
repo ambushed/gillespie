@@ -12,7 +12,6 @@ from autograd import jacobian
 #4.  Plug into the Loss function
 #5.  Do Gradient descent using the derivative of a loss function
 
-
 def gillespieGradientWalk():
 
     setup = Setup(yaml_file_name="lotka_volterra.yaml")
@@ -20,15 +19,16 @@ def gillespieGradientWalk():
     parameters = setup.get_parameter_list()
     species = setup.get_species()
     incr = setup.get_increments()
-    nPaths = 2#setup.get_number_of_paths()
-    T = 2.0#setup.get_time_horizon()
+    nPaths = 1 #setup.get_number_of_paths()
+    T = 2.0 #setup.get_time_horizon()
     seed = 100
     seed2 = 100000
 
     tau = np.linspace(0,T,51)
     idx = 0
 
-    my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
+    my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,
+                             increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
     observed_data = my_gillespie.run_simulation(*parameters)
 
     starting_parameters = [x for x in parameters]
@@ -40,19 +40,24 @@ def gillespieGradientWalk():
     cnt=0
 
     while cnt<20:
-        print "prev grad {} current grad {} starting_parameters[0] {}".format(prev_loss_function_grad,loss_function_grad,starting_parameters[0])
+
+        print "prev grad {} current grad {} starting_parameters[0] {}" \
+            .format(prev_loss_function_grad,loss_function_grad,starting_parameters[0])
         prev_loss_function_grad = loss_function_grad
 
-        gillespieGrad = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
-        gr = jacobian(gillespieGrad.run_simulation,idx)
-        gradient = gr(*starting_parameters)
+        gillespieGrad = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,
+                                  nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
+        gradient = gillespieGrad.take_gradients(*starting_parameters)
 
-        gillespieSim = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
+        gillespieSim = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,
+                                 nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
         simulated_data = gillespieSim.run_simulation(*starting_parameters)
+
         print "\n Simulated Data: \n {} \n Gradients: \n {} ".format(simulated_data[:10],gradient[:10])
         element_wise_grad = [(observed_data[i]-simulated_data[i])*gradient[i] for i in range(len(gradient))]
 
         loss_function_grad = 2*sum(element_wise_grad)
+
         starting_parameters[idx] = starting_parameters[idx]-loss_function_grad*dw
 
         cnt+=1
