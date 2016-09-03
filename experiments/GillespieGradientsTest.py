@@ -3,7 +3,14 @@ from gillespie import Setup
 import autograd.numpy as np
 from autograd import value_and_grad
 from autograd import grad
-from autograd import jacobian
+
+#TODO: make gradient work in parallel
+#how to parallelize the gradient of the loss function?
+#we could say : skip taking the gradient of gillespieGrad.run_simulation(*parameters).  Delegate it to an existing function
+#inside of that function parallelize and have each of the processors compute its path's gradient, then average and return
+#the parallel-computed gradient up the stack.
+#TODO: install optimizers package and start using adam
+
 
 def gillespieGradientWalk():
 
@@ -13,12 +20,13 @@ def gillespieGradientWalk():
     parameters = setup.get_parameter_list()
     species = setup.get_species()
     incr = setup.get_increments()
-    nPaths = 1 #setup.get_number_of_paths()
+    nPaths = 2 #setup.get_number_of_paths()
     T = 2.0 #setup.get_time_horizon()
     seed = 100
+    numProc = 1
 
     my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,
-                             increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = 1)
+                             increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
     observed_data = my_gillespie.run_simulation(*parameters)
 
     starting_parameters = [x for x in parameters]
@@ -27,7 +35,6 @@ def gillespieGradientWalk():
     dw = 0.0001
     prev_loss_function_grad = 100001.0
     loss_function_grad = 100000.0
-    numProc = 1
     print "{} \n".format(np.array(observed_data[:10]))
     cnt=0
 
@@ -35,7 +42,9 @@ def gillespieGradientWalk():
 
         gillespieGrad = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,
                                   nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc )
+
         simulated_data = gillespieGrad.run_simulation(*parameters)
+
         return sum((np.array(simulated_data)-np.array(observed_data))**2)
 
     while cnt<40:
