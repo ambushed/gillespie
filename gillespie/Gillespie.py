@@ -63,7 +63,6 @@ class Gillespie(object):
         meanM = 0
         meanO = 0
 
-        # it is enough to know the direction of the move?
         for i, propensity in enumerate(self.propensities):
             param = self.parameters[i]
             meanM += self.increments[0][i] * propensity(param, m, o) / a
@@ -97,19 +96,23 @@ class Gillespie(object):
 
         seed1 = parameters[-1]+self.seed
         seed2 = parameters[-1]+self.seed+100000
+
         state1 = nprandom.RandomState(seed1)
         state2 = nprandom.RandomState(seed2)
 
         while tauSamples[-1]<self.T:
 
-            tau = self.get_tau(nA, nB, self.generateR1(state1))
+            r1 = self.generateR1(state1)
+            tau = self.get_tau(nA, nB, r1)
             if (tau+tauSamples[-1]>self.T):
                 tauSamples.append(self.T)
                 aSamples.append(aSamples[-1])
                 bSamples.append(bSamples[-1])
                 break
             tauSamples.append(tau+tauSamples[-1])
-            nA,nB,expA,expB = self.evolve_species(self.generateR2(state2), nA, nB)
+
+            r2 = self.generateR2(state2)
+            nA,nB,expA,expB = self.evolve_species(r2, nA, nB)
 
             if self.useSmoothing:
                 aSamples.append(expA)
