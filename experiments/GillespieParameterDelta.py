@@ -7,7 +7,7 @@ def gillespieParameterVariance():
 
     setup = Setup(yaml_file_name="lotka_volterra.yaml")
     propensities = setup.get_propensity_list()
-    parameters = setup.get_parameter_list()
+    parameters = np.array(setup.get_parameter_list())
     species = setup.get_species()
     incr = setup.get_increments()
     nPaths = 2#setup.get_number_of_paths()
@@ -19,7 +19,7 @@ def gillespieParameterVariance():
     idx = 0
 
     my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,nPaths = nPaths,T=T,useSmoothing=False, seed = seed)
-    discrete_sim_data = my_gillespie.run_simulation(*parameters)
+    discrete_sim_data = my_gillespie.run_simulation(parameters)
     discrete_a = discrete_sim_data[:50]
     discrete_b = discrete_sim_data[50:]
 
@@ -30,8 +30,9 @@ def gillespieParameterVariance():
     for i in range(20):
         starting_parameters = [x for x in parameters]
         starting_parameters[idx] = parameters[idx]+step*i+offset
+        starting_parameters = np.array(starting_parameters)
         my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,nPaths = nPaths,T=T, useSmoothing=True, seed = seed2 + i*10000)
-        res = my_gillespie.run_simulation(*starting_parameters)
+        res = my_gillespie.run_simulation(starting_parameters)
         a_data.append(res[:50])
         b_data.append(res[50:])
         print(starting_parameters[idx])

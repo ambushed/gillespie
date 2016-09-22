@@ -80,10 +80,10 @@ class Gillespie(object):
         r2 = state.random_sample()
         return r2
 
-    def run_path(self, *parameters):
+    def run_path(self, parameters, seed_offset):
 
         self.timeGrid = np.linspace(0,self.T,self.numSteps)
-        self.parameters = parameters[:-1]
+        self.parameters = parameters
         self.alpha0 = lambda x,y: sum([pair[1](pair[0],x,y) for pair in zip(parameters,self.propensities)])
 
         tauSamples = []
@@ -95,8 +95,8 @@ class Gillespie(object):
         nA = self.a
         nB = self.b
 
-        seed1 = parameters[-1]+self.seed
-        seed2 = parameters[-1]+self.seed+100000
+        seed1 = seed_offset+self.seed
+        seed2 = seed_offset+self.seed+100000
 
         state1 = nprandom.RandomState(seed1)
         state2 = nprandom.RandomState(seed2)
@@ -128,9 +128,9 @@ class Gillespie(object):
 
         return np.array(aPath[1:]+bPath[1:])
 
-    def run_simulation(self,*parameters):
+    def run_simulation(self,parameters):
 
-        runner = partial(self.run_path, *parameters)
+        runner = partial(self.run_path, parameters)
         paths = self.mapFunc(runner,range(0,self.nPaths))
 
         zipped_paths = zip(*paths)
@@ -139,15 +139,15 @@ class Gillespie(object):
 
         return aResult+bResult
 
-    def take_gradients_path(self, *parameters):
+    def take_gradients_path(self, parameters, seed_offset):
 
         gr = jacobian(self.run_path, 0)
-        gradient = gr(*parameters)
+        gradient = gr(parameters,seed_offset)
         return gradient
 
-    def take_gradients(self, *parameters):
+    def take_gradients(self, parameters):
 
-        runner = partial(self.take_gradients_path, *parameters)
+        runner = partial(self.take_gradients_path, parameters)
         paths = self.mapFunc(runner,range(0,self.nPaths))
 
         zipped_paths = zip(*paths)

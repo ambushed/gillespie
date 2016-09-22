@@ -8,7 +8,7 @@ def gillespieGradientWalk():
     np.set_printoptions(precision=2)
     setup = Setup(yaml_file_name="lotka_volterra.yaml")
     propensities = setup.get_propensity_list()
-    parameters = setup.get_parameter_list()
+    parameters = np.array(setup.get_parameter_list())
     species = setup.get_species()
     incr = setup.get_increments()
     nPaths = 2 #setup.get_number_of_paths()
@@ -18,7 +18,7 @@ def gillespieGradientWalk():
 
     my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,
                              increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
-    observed_data = my_gillespie.run_simulation(*parameters)
+    observed_data = my_gillespie.run_simulation(parameters)
 
     starting_parameters = [x for x in parameters]
     idx = 0
@@ -28,13 +28,14 @@ def gillespieGradientWalk():
     loss_function_grad = 100000.0
     print "{} \n".format(np.array(observed_data[:10]))
     cnt=0
+    starting_parameters = np.array(starting_parameters)
 
-    def lossFunction(*parameters):
+    def lossFunction(parameters):
 
         gillespieGrad = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,
                                   nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc )
 
-        simulated_data = gillespieGrad.run_simulation(*parameters)
+        simulated_data = gillespieGrad.run_simulation(parameters)
 
         return sum((np.array(simulated_data)-np.array(observed_data))**2)
 
@@ -45,8 +46,8 @@ def gillespieGradientWalk():
 
         prev_loss_function_grad = loss_function_grad
         lossFunctionGrad = value_and_grad(lossFunction,idx)
-        value, gradient = lossFunctionGrad(*starting_parameters)
-        starting_parameters[idx] = starting_parameters[idx]-gradient*dw
+        value, gradient = lossFunctionGrad(starting_parameters)
+        starting_parameters[idx] = starting_parameters[idx]-gradient[idx]*dw
         print "\n Loss Function Value: \n {0} \n Gradient: \n {1} ".format(value,gradient)
         cnt+=1
 

@@ -7,7 +7,7 @@ def gillespieDiscreteVsSmoothPlot():
 
     setup = Setup(yaml_file_name="lotka_volterra.yaml")
     propensities = setup.get_propensity_list()
-    parameters = setup.get_parameter_list()
+    parameters = np.array(setup.get_parameter_list())
     species = setup.get_species()
     incr = setup.get_increments()
     nPaths = 2
@@ -15,9 +15,9 @@ def gillespieDiscreteVsSmoothPlot():
     seed = 1000
 
     my_gillespieUp = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing = False, seed = seed)
-    mean = my_gillespieUp.run_simulation(*parameters)
+    mean = my_gillespieUp.run_simulation(parameters)
     my_gillespieSmooth = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing = True, seed = seed)
-    meanS = my_gillespieSmooth.run_simulation(*parameters)
+    meanS = my_gillespieSmooth.run_simulation(parameters)
 
     tau = np.linspace(0,T,51)
     aMean = mean[:50]

@@ -7,7 +7,7 @@ def gillespieBumpAndRevalVsAutograd():
 
     setup = Setup(yaml_file_name="lotka_volterra.yaml")
     propensities = setup.get_propensity_list()
-    parameters = setup.get_parameter_list()
+    parameters = np.array(setup.get_parameter_list())
     species = setup.get_species()
     incr = setup.get_increments()
     nPaths = 1
@@ -26,10 +26,10 @@ def gillespieBumpAndRevalVsAutograd():
     parameters1 = [x for x in parameters]
     parameters1[idx] = parameters[idx]+delta
     my_gillespieUp = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
-    bumpUp = my_gillespieUp.run_simulation(*parameters1)
+    bumpUp = my_gillespieUp.run_simulation(parameters1)
     parameters1[idx] = parameters[idx]-delta
     my_gillespieDown = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
-    bumpDown = my_gillespieDown.run_simulation(*parameters1)
+    bumpDown = my_gillespieDown.run_simulation(parameters1)
     aBumpUp = bumpUp[:50]
     aBumpDown = bumpDown[:50]
     bBumpUp = bumpUp[50:]
