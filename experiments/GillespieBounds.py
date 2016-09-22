@@ -3,6 +3,8 @@ from gillespie import Setup
 import autograd.numpy as np
 import pylab as plt
 
+#compare the same number of runs
+#parameters, jacobian, value of the simulation (epsilon, weight)
 
 def gillespieDiscreteVsSmoothVariance():
 

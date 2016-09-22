@@ -5,6 +5,7 @@ import numpy.random as nprandom
 import autograd.numpy as np
 from functools import partial
 from autograd import jacobian
+from autograd import primitive
 from pathos.multiprocessing import ProcessingPool as Pool
 
 class Gillespie(object):

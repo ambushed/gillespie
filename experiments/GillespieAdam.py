@@ -2,6 +2,27 @@ from gillespie import Gillespie
 from gillespie import Setup
 import autograd.numpy as np
 from autograd import value_and_grad
+from autograd.util import flatten_func
+
+def adam(grad, init_params, callback=None, num_iters=100,
+         step_size=0.001, b1=0.9, b2=0.999, eps=10 ** -8):
+
+    """Adam as described in http://arxiv.org/pdf/1412.6980.pdf.
+    It's basically RMSprop with momentum and some correction terms."""
+    flattened_grad, unflatten, x = flatten_func(grad, init_params)
+
+    m = np.zeros(len(x))
+    v = np.zeros(len(x))
+    for i in range(num_iters):
+        g = flattened_grad(x, i)
+        if callback: callback(unflatten(x), i, unflatten(g))
+        m = (1 - b1) * g + b1 * m  # First  moment estimate.
+        v = (1 - b2) * (g ** 2) + b2 * v  # Second moment estimate.
+        mhat = m / (1 - b1 ** (i + 1))  # Bias correction.
+        vhat = v / (1 - b2 ** (i + 1))
+        x = x - step_size * mhat / (np.sqrt(vhat) + eps)
+
+    return unflatten(x)
 
 def gillespieGradientWalk():
 
@@ -23,11 +44,7 @@ def gillespieGradientWalk():
     starting_parameters = [x for x in parameters]
     idx = 0
     starting_parameters[idx] = parameters[idx]+0.2
-    dw = 0.0001
-    prev_loss_function_grad = 100001.0
-    loss_function_grad = 100000.0
     print "{} \n".format(np.array(observed_data[:10]))
-    cnt=0
 
     def lossFunction(*parameters):
 
@@ -38,17 +55,8 @@ def gillespieGradientWalk():
 
         return sum((np.array(simulated_data)-np.array(observed_data))**2)
 
-    while cnt<40:
-
-        print "prev grad {} current grad {} starting_parameters[0] {}" \
-            .format(prev_loss_function_grad,loss_function_grad,starting_parameters[0])
-
-        prev_loss_function_grad = loss_function_grad
-        lossFunctionGrad = value_and_grad(lossFunction,idx)
-        value, gradient = lossFunctionGrad(*starting_parameters)
-        starting_parameters[idx] = starting_parameters[idx]-gradient*dw
-        print "\n Loss Function Value: \n {0} \n Gradient: \n {1} ".format(value,gradient)
-        cnt+=1
+    lossFunctionGrad = value_and_grad(lossFunction,idx)
+    adam(lossFunctionGrad,starting_parameters)
 
 if __name__ == "__main__":
     gillespieGradientWalk()
