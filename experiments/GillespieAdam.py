@@ -5,8 +5,8 @@ from autograd import value_and_grad
 from autograd import grad
 from autograd.util import flatten_func
 
-def adam(grad, init_params, callback=None, num_iters=10,
-         step_size=0.001, b1=0.9, b2=0.999, eps=10 ** -8):
+def adam(grad, init_params, callback=None, num_iters=200,
+         step_size=np.array([0.01,0.000001,0.01]), b1=0.9, b2=0.999, eps=10 ** -8):
 
     """Adam as described in http://arxiv.org/pdf/1412.6980.pdf.
     It's basically RMSprop with momentum and some correction terms."""
@@ -21,17 +21,21 @@ def adam(grad, init_params, callback=None, num_iters=10,
         v = (1 - b2) * (g ** 2) + b2 * v  # Second moment estimate.
         mhat = m / (1 - b1 ** (i + 1))  # Bias correction.
         vhat = v / (1 - b2 ** (i + 1))
-        x = x - step_size * mhat / (np.sqrt(vhat) + eps)
-        print "iteration {} parameters {}".format(unflatten(x))
+        update = np.diag(step_size) * mhat / (np.sqrt(vhat) + eps)
+
+        print np.diag(update)
+
+        x = x - np.dot(update,np.array([1,1,1]))
+        print "iteration {} parameters {}".format(i,unflatten(x))
 
     return unflatten(x)
 
 def gillespieGradientWalk():
 
-    np.set_printoptions(precision=2)
+    np.set_printoptions(precision=4)
     setup = Setup(yaml_file_name="lotka_volterra.yaml")
     propensities = setup.get_propensity_list()
-    parameters = setup.get_parameter_list()
+    parameters = np.array(setup.get_parameter_list())
     species = setup.get_species()
     incr = setup.get_increments()
     nPaths = 1 #setup.get_number_of_paths()

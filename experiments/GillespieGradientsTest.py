@@ -5,7 +5,7 @@ from autograd import value_and_grad
 
 def gillespieGradientWalk():
 
-    np.set_printoptions(precision=2)
+    np.set_printoptions(precision=4)
     setup = Setup(yaml_file_name="lotka_volterra.yaml")
     propensities = setup.get_propensity_list()
     parameters = np.array(setup.get_parameter_list())
@@ -16,18 +16,17 @@ def gillespieGradientWalk():
     seed = 100
     numProc = 1
 
+    idx = 1
+
     my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,
                              increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
     observed_data = my_gillespie.run_simulation(parameters)
 
     starting_parameters = [x for x in parameters]
-    idx = 0
-    starting_parameters[idx] = parameters[idx]+0.2
-    dw = 0.0001
-    prev_loss_function_grad = 100001.0
-    loss_function_grad = 100000.0
+    starting_parameters[idx] = parameters[idx]+parameters[idx]*0.05
+    starting_parameters = np.array(starting_parameters)
+    dw = np.array([0.0001,0.000000001,0.0001])
     print "{} \n".format(np.array(observed_data[:10]))
-    cnt=0
     starting_parameters = np.array(starting_parameters)
 
     def lossFunction(parameters):
@@ -39,17 +38,16 @@ def gillespieGradientWalk():
 
         return sum((np.array(simulated_data)-np.array(observed_data))**2)
 
-    while cnt<40:
+    i=0
+    while i<40:
 
-        print "prev grad {} current grad {} starting_parameters[0] {}" \
-            .format(prev_loss_function_grad,loss_function_grad,starting_parameters[0])
+        print "Iteration {}. Current value of a parameter at index {} is {}".format(i, idx,starting_parameters[idx])
 
-        prev_loss_function_grad = loss_function_grad
-        lossFunctionGrad = value_and_grad(lossFunction,idx)
+        lossFunctionGrad = value_and_grad(lossFunction)
         value, gradient = lossFunctionGrad(starting_parameters)
-        starting_parameters[idx] = starting_parameters[idx]-gradient[idx]*dw
+        starting_parameters[idx] = starting_parameters[idx]-gradient[idx]*dw[idx]
         print "\n Loss Function Value: \n {0} \n Gradient: \n {1} ".format(value,gradient)
-        cnt+=1
+        i+=1
 
 if __name__ == "__main__":
     gillespieGradientWalk()
