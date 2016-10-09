@@ -4,6 +4,14 @@ import autograd.numpy as np
 from autograd import value_and_grad
 from autograd import grad
 from autograd.util import flatten_func
+import matplotlib
+matplotlib.use('Qt4Agg')
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+from pylab import get_current_fig_manager
+
+fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
 
 def adam(grad, init_params, callback=None, num_iters=200,
          step_size=np.array([0.01,0.000001,0.01]), b1=0.9, b2=0.999, eps=10 ** -8):
@@ -12,6 +20,9 @@ def adam(grad, init_params, callback=None, num_iters=200,
     It's basically RMSprop with momentum and some correction terms."""
     flattened_grad, unflatten, x = flatten_func(grad, init_params)
 
+    param1 = []
+    param2 = []
+    param3 = []
     m = np.zeros(len(x))
     v = np.zeros(len(x))
     for i in range(num_iters):
@@ -27,8 +38,13 @@ def adam(grad, init_params, callback=None, num_iters=200,
 
         x = x - np.dot(update,np.array([1,1,1]))
         print "iteration {} parameters {}".format(i,unflatten(x))
+        unflattened_x = unflatten(x)
+        param1.append(unflattened_x[0])
+        param2.append(unflattened_x[1])
+        param3.append(unflattened_x[2])
 
-    return unflatten(x)
+
+    return param1,param2,param3
 
 def gillespieGradientWalk():
 
@@ -65,7 +81,27 @@ def gillespieGradientWalk():
         return sum((np.array(simulated_data)-np.array(observed_data))**2)
 
     lossFunctionGrad = grad(lossFunction,idx)
-    print adam(lossFunctionGrad,starting_parameters)
+
+    param0,param1,param2 = adam(lossFunctionGrad,starting_parameters, num_iters=200)
+    fig,(ax0, ax1, ax2) = plt.subplots(nrows=3,sharex=True)
+    x = [x for x in range(len(param1))]
+    p0 = [parameters[0] for _ in range(len(x))]
+    p1 = [parameters[1] for _ in range(len(x))]
+    p2 = [parameters[2] for _ in range(len(x))]
+
+    ax0.plot(x,param0,label="Parameter 0",linewidth=2)
+    ax0.plot(x,p0,label="Actual Value ",linewidth=4)
+
+    ax1.plot(x,param1,label="Parameter 1",linewidth=2)
+    ax1.plot(x,p1,label="Actual Value ",linewidth=4)
+
+    ax2.plot(x,param2,label="Parameter 2",linewidth=2)
+    ax2.plot(x,p2,label="Actual Value ",linewidth=4)
+
+    plt.savefig("convergence.png")
+    plt.show()
 
 if __name__ == "__main__":
     gillespieGradientWalk()
+
+
