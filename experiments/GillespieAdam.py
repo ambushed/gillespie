@@ -2,49 +2,48 @@ from gillespie import Gillespie
 from gillespie import Setup
 import autograd.numpy as np
 from autograd import value_and_grad
-from autograd import grad
 from autograd.util import flatten_func
 import matplotlib
+import math
 matplotlib.use('Qt4Agg')
-import matplotlib.animation as animation
 import matplotlib.pyplot as plt
-from pylab import get_current_fig_manager
 
 fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
 
 def adam(grad, init_params, callback=None, num_iters=200,
-         step_size=np.array([0.01,0.000001,0.01]), b1=0.9, b2=0.999, eps=10 ** -8):
+         step_size=np.array([0.5]*3), b1=0.9, b2=0.999, eps=10 ** -8):
 
     """Adam as described in http://arxiv.org/pdf/1412.6980.pdf.
     It's basically RMSprop with momentum and some correction terms."""
     flattened_grad, unflatten, x = flatten_func(grad, init_params)
 
+    cost_list = []
     param1 = []
     param2 = []
     param3 = []
     m = np.zeros(len(x))
     v = np.zeros(len(x))
-    for i in range(num_iters):
+    cost = 1000000000
+    for i in range(1,num_iters):
+        print "iteration {} cost {} parameters {}".format(i, cost, unflatten(np.exp(x)))
         g = flattened_grad(x, i)
+        cost = g[0]
+        g = g[1:]
+        m = b1 * g + (1-b1) * m  # First  moment estimate.
+        v = b2 * (g ** 2) + (1- b2) * v  # Second moment estimate.
+        gamma = math.sqrt(1-(1-b2)**i)/(1-(1-b1)**i)
+        update = step_size*gamma*m/np.sqrt(i*v)
         if callback: callback(unflatten(x), i, unflatten(g))
-        m = (1 - b1) * g + b1 * m  # First  moment estimate.
-        v = (1 - b2) * (g ** 2) + b2 * v  # Second moment estimate.
-        mhat = m / (1 - b1 ** (i + 1))  # Bias correction.
-        vhat = v / (1 - b2 ** (i + 1))
-        update = np.diag(step_size) * mhat / (np.sqrt(vhat) + eps)
-
-        print np.diag(update)
-
-        x = x - np.dot(update,np.array([1,1,1]))
-        print "iteration {} parameters {}".format(i,unflatten(x))
+        x = x - update
         unflattened_x = unflatten(x)
-        param1.append(unflattened_x[0])
-        param2.append(unflattened_x[1])
-        param3.append(unflattened_x[2])
+        cost_list.append(cost)
+        param1.append(np.exp(unflattened_x[0]))
+        param2.append(np.exp(unflattened_x[1]))
+        param3.append(np.exp(unflattened_x[2]))
 
 
-    return param1,param2,param3
+    return cost_list,param1,param2,param3
 
 def gillespieGradientWalk():
 
@@ -61,11 +60,14 @@ def gillespieGradientWalk():
 
     my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,
                              increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
-    observed_data = my_gillespie.run_simulation(parameters)
+
+    observed_data = my_gillespie.run_simulation(np.log(parameters))
 
     starting_parameters = [x for x in parameters]
     idx = 0
-    starting_parameters[idx] = parameters[idx]+0.2
+    starting_parameters[0] = parameters[0]+parameters[0]*0.2
+    starting_parameters[1] = parameters[1]+parameters[1]*0.2
+    starting_parameters[2] = parameters[2]+parameters[2]*0.2
     print "{} \n".format(np.array(observed_data[:10]))
 
     parameters = np.array(parameters)
@@ -78,19 +80,24 @@ def gillespieGradientWalk():
 
         simulated_data = gillespieGrad.run_simulation(parameters)
 
-        return sum((np.array(simulated_data)-np.array(observed_data))**2)
+        return sum(0.5*(np.array(simulated_data)-np.array(observed_data))**2)
 
-    lossFunctionGrad = grad(lossFunction,idx)
+    lossFunctionGrad = value_and_grad(lossFunction,idx)
 
-    param0,param1,param2 = adam(lossFunctionGrad,starting_parameters, num_iters=200)
-    fig,(ax0, ax1, ax2) = plt.subplots(nrows=3,sharex=True)
+    cost_list,param0,param1,param2 = adam(lossFunctionGrad,np.log(starting_parameters), num_iters=50)
+    fig,(axC, ax0, ax1, ax2) = plt.subplots(nrows=4,sharex=True)
     x = [x for x in range(len(param1))]
+
     p0 = [parameters[0] for _ in range(len(x))]
     p1 = [parameters[1] for _ in range(len(x))]
     p2 = [parameters[2] for _ in range(len(x))]
 
+    axC.plot(x,cost_list,label="Cost",linewidth=2)
+    axC.set_title("Loss")
+
     ax0.plot(x,param0,label="Parameter 0",linewidth=2)
     ax0.plot(x,p0,label="Actual Value ",linewidth=4)
+    ax0.set_title("Parameter 0 = {}".format(parameters[0]))
 
     ax1.plot(x,param1,label="Parameter 1",linewidth=2)
     ax1.plot(x,p1,label="Actual Value ",linewidth=4)

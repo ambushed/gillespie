@@ -19,7 +19,7 @@ def gillespieParameterVariance():
     idx = 0
 
     my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,nPaths = nPaths,T=T,useSmoothing=False, seed = seed)
-    discrete_sim_data = my_gillespie.run_simulation(parameters)
+    discrete_sim_data = my_gillespie.run_simulation(np.log(parameters))
     discrete_a = discrete_sim_data[:50]
     discrete_b = discrete_sim_data[50:]
 
@@ -32,7 +32,7 @@ def gillespieParameterVariance():
         starting_parameters[idx] = parameters[idx]+step*i+offset
         starting_parameters = np.array(starting_parameters)
         my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,nPaths = nPaths,T=T, useSmoothing=True, seed = seed2 + i*10000)
-        res = my_gillespie.run_simulation(starting_parameters)
+        res = my_gillespie.run_simulation(np.log(starting_parameters))
         a_data.append(res[:50])
         b_data.append(res[50:])
         print(starting_parameters[idx])

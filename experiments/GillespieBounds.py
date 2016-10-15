@@ -35,7 +35,7 @@ def gillespieDiscreteVsSmoothVariance():
     for i in range(50):
         my_gillespie = Gillespie(a=species[0], b=species[1], propensities=propensities, increments=incr,
                                  nPaths=nPaths, T=T, useSmoothing=True,numSteps=numSteps, seed = seed2+i*stride)
-        res = my_gillespie.run_simulation(parameters)
+        res = my_gillespie.run_simulation(np.log(parameters))
         smooth_a = res[:numSteps-1]
         smooth_b = res[numSteps-1:]
         a_diff.append([a - b for a, b in zip(smooth_a, discrete_a)])

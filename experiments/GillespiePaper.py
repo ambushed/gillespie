@@ -5,7 +5,7 @@ import pylab as plt
 
 def gillespieDiscreteVsSmoothPlot():
 
-    setup = Setup(yaml_file_name="lotka_volterra.yaml")
+    setup = Setup(yaml_file_name="lotka_volterra_paper.yaml")
     propensities = setup.get_propensity_list()
     parameters = np.array(setup.get_parameter_list())
     species = setup.get_species()
@@ -22,9 +22,13 @@ def gillespieDiscreteVsSmoothPlot():
     tau = np.linspace(0,T,51)
     aMean = mean[:50]
     aMeanS = meanS[:50]
+    bMean = mean[50:]
+    bMeanS = meanS[50:]
 
     plt.plot(tau[1:],aMeanS,label="Smooth A")
     plt.step(tau[1:],aMean,label='Step A')
+    plt.plot(tau[1:],bMeanS,label="Smooth B")
+    plt.step(tau[1:],bMean,label='Step B')
     legend = plt.legend(loc='upper center', shadow=True)
     frame = legend.get_frame()
     frame.set_facecolor('0.90')

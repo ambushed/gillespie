@@ -1,5 +1,7 @@
 import yaml
 import os
+import math
+import autograd.numpy as np
 
 class Setup(object):
 

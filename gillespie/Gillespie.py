@@ -84,7 +84,7 @@ class Gillespie(object):
 
         self.timeGrid = np.linspace(0,self.T,self.numSteps)
         self.parameters = parameters
-        self.alpha0 = lambda x,y: sum([pair[1](pair[0],x,y) for pair in zip(parameters,self.propensities)])
+        self.alpha0 = lambda x,y: sum(pair[1](pair[0],x,y) for pair in zip(parameters,self.propensities))
 
         tauSamples = []
         tauSamples.append(0.0)

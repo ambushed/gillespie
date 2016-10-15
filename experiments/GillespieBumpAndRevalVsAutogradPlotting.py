@@ -19,17 +19,17 @@ def gillespieBumpAndRevalVsAutograd():
     idx = 0
 
     my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
-    gradients = my_gillespie.take_gradients(*parameters)
+    gradients = my_gillespie.take_gradients(*np.log(parameters))
     aGradient = gradients[:50]
     bGradient = gradients[50:]
 
     parameters1 = [x for x in parameters]
     parameters1[idx] = parameters[idx]+delta
     my_gillespieUp = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
-    bumpUp = my_gillespieUp.run_simulation(parameters1)
+    bumpUp = my_gillespieUp.run_simulation(np.log(parameters1))
     parameters1[idx] = parameters[idx]-delta
     my_gillespieDown = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
-    bumpDown = my_gillespieDown.run_simulation(parameters1)
+    bumpDown = my_gillespieDown.run_simulation(np.log(parameters1))
     aBumpUp = bumpUp[:50]
     aBumpDown = bumpDown[:50]
     bBumpUp = bumpUp[50:]
