@@ -1,0 +1,23 @@
+---
+increments:
+  - "1,-1,1,-1"
+  - "-1,1,0,0"
+  - "0,0,-1,1"
+parameters:
+  - 3e-7
+  - 10e-4
+  - 0.000773
+  - 3.276
+propensities:
+  - "lambda c,x,y,z: np.exp(c)*x*(x-1)*0.5"
+  - "lambda c,x,y,z: np.exp(c)*x*(x-1)*(x-2)/6"
+  - "lambda c,x,y,z: np.exp(c)*z"
+  - "lambda c,x,y,z: np.exp(c)*x"
+species:
+  - 250
+  - 1e5
+  - 2e5
+number_of_paths: 10
+time_horizon: 15
+
+

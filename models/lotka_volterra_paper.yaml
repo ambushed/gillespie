@@ -3,16 +3,16 @@ increments:
   - "1,-1,0"
   - "0,1,-1"
 parameters:
-  - 2
-  - 0.002
   - 1
+  - 0.005
+  - 0.6
 propensities:
   - "lambda c,x,y: np.exp(c)*x"
   - "lambda c,x,y: np.exp(c)*x*y"
   - "lambda c,x,y: np.exp(c)*y"
 species:
-  - 1000
-  - 500
+  - 50
+  - 100
 number_of_paths: 10
 time_horizon: 15
 
