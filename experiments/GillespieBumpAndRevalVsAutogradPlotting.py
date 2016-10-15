@@ -18,17 +18,17 @@ def gillespieBumpAndRevalVsAutograd():
     delta = 0.000001
     idx = 0
 
-    my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
-    gradients = my_gillespie.take_gradients(*np.log(parameters))
+    my_gillespie = Gillespie(species=species,propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
+    gradients = my_gillespie.take_gradients(np.log(parameters))
     aGradient = gradients[:50]
     bGradient = gradients[50:]
 
     parameters1 = [x for x in parameters]
     parameters1[idx] = parameters[idx]+delta
-    my_gillespieUp = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
+    my_gillespieUp = Gillespie(species=species,propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
     bumpUp = my_gillespieUp.run_simulation(np.log(parameters1))
     parameters1[idx] = parameters[idx]-delta
-    my_gillespieDown = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
+    my_gillespieDown = Gillespie(species=species,propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True, seed = seed)
     bumpDown = my_gillespieDown.run_simulation(np.log(parameters1))
     aBumpUp = bumpUp[:50]
     aBumpDown = bumpDown[:50]
@@ -39,11 +39,11 @@ def gillespieBumpAndRevalVsAutograd():
 
     fig,(ax0, ax1) = plt.subplots(nrows=2,sharex=True)
     ax0.plot(tau[1:],diffA,label="BumpAndReval ",linewidth=10)
-    ax0.plot(tau[1:],aGradient,label="Autograd ",linewidth=5)
+    ax0.plot(tau[1:],zip(*aGradient)[0],label="Autograd ",linewidth=5)
     ax0.set_title("Species A. AutoGrad vs BumpAndReval T: {} nPaths: {}".format(T,nPaths))
 
     ax1.plot(tau[1:],diffB,label="BumpAndReval",linewidth=10)
-    ax1.plot(tau[1:],bGradient,label="Autograd ",linewidth=5)
+    ax1.plot(tau[1:],zip(*bGradient)[0],label="Autograd ",linewidth=5)
     ax1.set_title("Species B. AutoGrad vs BumpAndReval T: {} nPaths: {}".format(T,nPaths))
     plt.show()
 
