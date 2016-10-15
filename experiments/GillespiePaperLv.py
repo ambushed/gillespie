@@ -14,9 +14,9 @@ def gillespieDiscreteVsSmoothPlot():
     T = 15
     seed = 1000
 
-    my_gillespieUp = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing = False, seed = seed)
+    my_gillespieUp = Gillespie(species=species,propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing = False, seed = seed)
     mean = my_gillespieUp.run_simulation(np.log(parameters))
-    my_gillespieSmooth = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing = True, seed = seed)
+    my_gillespieSmooth = Gillespie(species=species,propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing = True, seed = seed)
     meanS = my_gillespieSmooth.run_simulation(np.log(parameters))
 
     tau = np.linspace(0,T,51)

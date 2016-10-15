@@ -27,7 +27,7 @@ class Setup(object):
 
     def get_species(self):
         species = self.setup['species']
-        return [int(s) for s in species]
+        return [float(s) for s in species]
 
     def get_increments(self):
         increments = self.setup['increments']

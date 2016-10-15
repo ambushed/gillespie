@@ -14,11 +14,11 @@ class GillespieTestSuiteRegression(unittest.TestCase):
         nPaths = setup.get_number_of_paths()
         T = setup.get_time_horizon()
         seed = 4000
-        my_gillespieUp = Gillespie(a=species[0], b=species[1], propensities=propensities, increments=incr, nPaths=nPaths,
+        my_gillespieUp = Gillespie(species=species, propensities=propensities, increments=incr, nPaths=nPaths,
                                    T=T, useSmoothing=False, numProc = 2, seed = seed)
 
         parameters = np.array(parameters)
-        result = my_gillespieUp.run_simulation(parameters)
+        result = my_gillespieUp.run_simulation(np.log(parameters))
         expected = [1286.2, 1300.4000000000001, 920.70000000000005, 518.79999999999995, 283.19999999999999,
                    179.09999999999999, 133.69999999999999, 126.3, 132.09999999999999, 151.59999999999999,
                    192.30000000000001, 250.30000000000001, 349.10000000000002, 477.69999999999999, 665.70000000000005,
@@ -58,8 +58,8 @@ class GillespieTestSuiteRegression(unittest.TestCase):
 
         parameters = np.array(parameters)
 
-        gillespieGrad = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True,numProc=2, seed=seed)
-        gradient = gillespieGrad.take_gradients(parameters)
+        gillespieGrad = Gillespie(species=species,propensities=propensities,increments=incr, nPaths = nPaths,T=T,useSmoothing=True,numProc=2, seed=seed)
+        gradient = gillespieGrad.take_gradients(np.log(parameters))
 
         expected = [0.20615962712971669, 0.20765962497976251, 0.20946011564211109, 0.21122237250866763,
                    0.21271498482749313, 0.21392790067199691, 0.21528167987721566, 0.21603052898934599,
