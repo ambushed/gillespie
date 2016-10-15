@@ -18,9 +18,9 @@ def gillespieGradientWalk():
 
     idx = 1
 
-    my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,
+    my_gillespie = Gillespie(species=species,propensities=propensities,
                              increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
-    observed_data = my_gillespie.run_simulation(np.log(parameters))
+    observed_data = my_gillespie.run_simulation(parameters)
 
     starting_parameters = [x for x in parameters]
     starting_parameters[idx] = parameters[idx]+parameters[idx]*0.05
@@ -31,7 +31,7 @@ def gillespieGradientWalk():
 
     def lossFunction(parameters):
 
-        gillespieGrad = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,
+        gillespieGrad = Gillespie(species=species,propensities=propensities,increments=incr,
                                   nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc )
 
         simulated_data = gillespieGrad.run_simulation(parameters)
@@ -44,7 +44,7 @@ def gillespieGradientWalk():
         print "Iteration {}. Current value of a parameter at index {} is {}".format(i, idx,starting_parameters[idx])
 
         lossFunctionGrad = value_and_grad(lossFunction)
-        value, gradient = lossFunctionGrad(np.log(starting_parameters))
+        value, gradient = lossFunctionGrad(starting_parameters)
         starting_parameters[idx] = starting_parameters[idx]-gradient[idx]*dw[idx]
         print "\n Loss Function Value: \n {0} \n Gradient: \n {1} ".format(value,gradient)
         i+=1

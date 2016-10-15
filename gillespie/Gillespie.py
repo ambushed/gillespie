@@ -80,9 +80,10 @@ class Gillespie(object):
 
     def run_path(self, parameters, seed_offset):
 
+
         self.timeGrid = np.linspace(0,self.T,self.numSteps)
-        self.parameters = parameters
-        self.alpha0 = lambda x: sum(pair[1](pair[0],x) for pair in zip(parameters,self.propensities))
+        self.parameters = np.log(parameters)
+        self.alpha0 = lambda x: sum(pair[1](pair[0],x) for pair in zip(self.parameters,self.propensities))
 
         tauSamples = []
         tauSamples.append(0.0)

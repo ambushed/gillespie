@@ -61,7 +61,7 @@ def gillespieGradientWalk():
     my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,
                              increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
 
-    observed_data = my_gillespie.run_simulation(np.log(parameters))
+    observed_data = my_gillespie.run_simulation(parameters)
 
     starting_parameters = [x for x in parameters]
     idx = 0
@@ -84,7 +84,7 @@ def gillespieGradientWalk():
 
     lossFunctionGrad = value_and_grad(lossFunction,idx)
 
-    cost_list,param0,param1,param2 = adam(lossFunctionGrad,np.log(starting_parameters), num_iters=50)
+    cost_list,param0,param1,param2 = adam(lossFunctionGrad,starting_parameters, num_iters=50)
     fig,(axC, ax0, ax1, ax2) = plt.subplots(nrows=4,sharex=True)
     x = [x for x in range(len(param1))]
 

@@ -20,13 +20,13 @@ def gillespieRandomnessVariance():
     timeGrid = np.linspace(0, T, numSteps)[1:]
     a_diff = []
     b_diff = []
-    my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,nPaths = nPaths,T=T,useSmoothing=False,numSteps = numSteps,numProc = 2, seed = seed)
-    discrete_sim_data = my_gillespie.run_simulation(np.log(parameters))
+    my_gillespie = Gillespie(species=species,propensities=propensities,increments=incr,nPaths = nPaths,T=T,useSmoothing=False,numSteps = numSteps,numProc = 2, seed = seed)
+    discrete_sim_data = my_gillespie.run_simulation(parameters)
     base_a = discrete_sim_data[:numSteps-1]
     base_b = discrete_sim_data[numSteps-1:]
     for i in range(5):
-        my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,nPaths = nPaths,T=T,useSmoothing=False,numSteps = numSteps, numProc = 2, seed = seed2+i*stride)
-        discrete_sim_data = my_gillespie.run_simulation(np.log(parameters))
+        my_gillespie = Gillespie(species=species,propensities=propensities,increments=incr,nPaths = nPaths,T=T,useSmoothing=False,numSteps = numSteps, numProc = 2, seed = seed2+i*stride)
+        discrete_sim_data = my_gillespie.run_simulation(parameters)
         discrete_a = discrete_sim_data[:numSteps-1]
         discrete_b = discrete_sim_data[numSteps-1:]
         a_diff.append([a - b for a, b in zip(discrete_a, base_a)])
