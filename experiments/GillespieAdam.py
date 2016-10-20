@@ -20,6 +20,7 @@ def adam(grad, init_params, callback=None, num_iters=200,
     flattened_grad, unflatten, x = flatten_func(grad, init_params)
 
     cost_list = []
+    cost_list.append(1e10)
     param1 = []
     param2 = []
     param3 = []
@@ -28,7 +29,6 @@ def adam(grad, init_params, callback=None, num_iters=200,
     param3.append(init_params[2])
     m = np.zeros(len(x))
     v = np.zeros(len(x))
-    cost = 1e10
     update = 0
     #step_size[1:] = 0.0
     for i in range(1,num_iters):
@@ -36,7 +36,7 @@ def adam(grad, init_params, callback=None, num_iters=200,
         #if i % 10 == 0:
         #    step_size*=0.5
 
-        if cost < 5000:
+        if cost_list[-1] < 5000:
             break
 
         g = flattened_grad(x, i)
@@ -97,7 +97,7 @@ def gillespieGradientWalk():
 
     lossFunctionGrad = value_and_grad(lossFunction,idx)
 
-    cost_list,param0,param1,param2 = adam(lossFunctionGrad,starting_parameters, num_iters=50)
+    cost_list,param0,param1,param2 = adam(lossFunctionGrad,starting_parameters, num_iters=3)
 
     fig,(axC, ax0, ax1, ax2) = plt.subplots(nrows=4,sharex=True)
     x = [x for x in range(len(param1))]
@@ -111,16 +111,17 @@ def gillespieGradientWalk():
 
     ax0.plot(x,param0,label="Parameter 0",linewidth=2)
     ax0.plot(x,p0,label="Actual Value ",linewidth=4)
-    ax0.set_title("Parameter 0 = {}".format(parameters[0]))
+    ax0.set_title("c1:  True = {}, Start = {}, Result = {}".format(parameters[0],starting_parameters[0],param0[-1]))
 
     ax1.plot(x,param1,label="Parameter 1",linewidth=2)
     ax1.plot(x,p1,label="Actual Value ",linewidth=4)
+    ax1.set_title("c2: True = {}, Start = {}, Result = {}".format(parameters[1],starting_parameters[1],param1[-1]))
 
     ax2.plot(x,param2,label="Parameter 2",linewidth=2)
     ax2.plot(x,p2,label="Actual Value ",linewidth=4)
+    ax2.set_title("c3: True = {}, Start = {}, Result = {}".format(parameters[2],starting_parameters[2],param2[-1]))
 
     plt.savefig("convergence.png")
-    plt.title("First parameter bumped")
     plt.show()
 
 if __name__ == "__main__":
