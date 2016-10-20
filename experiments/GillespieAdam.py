@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 
 fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
+np.set_printoptions(precision=4)
 
 def adam(grad, init_params, callback=None, num_iters=200,
-         step_size=np.array([0.5]*3), b1=0.9, b2=0.999, eps=10 ** -8):
+         step_size=np.array([0.5,0.5,0.5]), b1=0.9, b2=0.999, eps=10 ** -8):
 
     """Adam as described in http://arxiv.org/pdf/1412.6980.pdf.
     It's basically RMSprop with momentum and some correction terms."""
@@ -22,26 +23,37 @@ def adam(grad, init_params, callback=None, num_iters=200,
     param1 = []
     param2 = []
     param3 = []
+    param1.append(init_params[0])
+    param2.append(init_params[1])
+    param3.append(init_params[2])
     m = np.zeros(len(x))
     v = np.zeros(len(x))
-    cost = 1000000000
+    cost = 1e10
+    update = 0
+    #step_size[1:] = 0.0
     for i in range(1,num_iters):
-        print "iteration {} cost {} parameters {}".format(i, cost, unflatten(np.exp(x)))
+
+        #if i % 10 == 0:
+        #    step_size*=0.5
+
+        if cost < 5000:
+            break
+
         g = flattened_grad(x, i)
         cost = g[0]
         g = g[1:]
         m = b1 * g + (1-b1) * m  # First  moment estimate.
         v = b2 * (g ** 2) + (1- b2) * v  # Second moment estimate.
         gamma = math.sqrt(1-(1-b2)**i)/(1-(1-b1)**i)
+        print "iteration {} cost {} parameters {} log update {} ".format(i, cost, unflatten(x), update)
         update = step_size*gamma*m/np.sqrt(i*v)
         if callback: callback(unflatten(x), i, unflatten(g))
-        x = x - update
+        x = np.exp(np.log(x) - update)
         unflattened_x = unflatten(x)
         cost_list.append(cost)
-        param1.append(np.exp(unflattened_x[0]))
-        param2.append(np.exp(unflattened_x[1]))
-        param3.append(np.exp(unflattened_x[2]))
-
+        param1.append(unflattened_x[0])
+        param2.append(unflattened_x[1])
+        param3.append(unflattened_x[2])
 
     return cost_list,param1,param2,param3
 
@@ -58,7 +70,7 @@ def gillespieGradientWalk():
     seed = 100
     numProc = 1
 
-    my_gillespie = Gillespie(a=species[0],b=species[1],propensities=propensities,
+    my_gillespie = Gillespie(species=species,propensities=propensities,
                              increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
 
     observed_data = my_gillespie.run_simulation(parameters)
@@ -68,6 +80,7 @@ def gillespieGradientWalk():
     starting_parameters[0] = parameters[0]+parameters[0]*0.2
     starting_parameters[1] = parameters[1]+parameters[1]*0.2
     starting_parameters[2] = parameters[2]+parameters[2]*0.2
+
     print "{} \n".format(np.array(observed_data[:10]))
 
     parameters = np.array(parameters)
@@ -75,7 +88,7 @@ def gillespieGradientWalk():
 
     def lossFunction(parameters,one_more):
 
-        gillespieGrad = Gillespie(a=species[0],b=species[1],propensities=propensities,increments=incr,
+        gillespieGrad = Gillespie(species=species,propensities=propensities,increments=incr,
                                   nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc )
 
         simulated_data = gillespieGrad.run_simulation(parameters)
@@ -85,6 +98,7 @@ def gillespieGradientWalk():
     lossFunctionGrad = value_and_grad(lossFunction,idx)
 
     cost_list,param0,param1,param2 = adam(lossFunctionGrad,starting_parameters, num_iters=50)
+
     fig,(axC, ax0, ax1, ax2) = plt.subplots(nrows=4,sharex=True)
     x = [x for x in range(len(param1))]
 
@@ -106,6 +120,7 @@ def gillespieGradientWalk():
     ax2.plot(x,p2,label="Actual Value ",linewidth=4)
 
     plt.savefig("convergence.png")
+    plt.title("First parameter bumped")
     plt.show()
 
 if __name__ == "__main__":

@@ -9,10 +9,10 @@ parameters:
   - 0.000773
   - 3.276
 propensities:
-  - "lambda c,x: np.exp(c)*x[0]*(x[0]-1)*x[1]*0.5"
-  - "lambda c,x: np.exp(c)*x[0]*(x[0]-1)*(x[0]-2.)/6."
-  - "lambda c,x: np.exp(c)*x[2]"
-  - "lambda c,x: np.exp(c)*x[0]"
+  - "lambda c,x: c*x[0]*(x[0]-1)*x[1]*0.5"
+  - "lambda c,x: c*x[0]*(x[0]-1)*(x[0]-2.)/6."
+  - "lambda c,x: c*x[2]"
+  - "lambda c,x: c*x[0]"
 species:
   - 250
   - 1e5

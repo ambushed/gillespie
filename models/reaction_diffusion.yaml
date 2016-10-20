@@ -8,10 +8,10 @@ parameters:
   - 1.2
   - 1
 propensities:
-  - "lambda c,x,y: c*x*max(x-1,0)"
-  - "lambda c,x,y: c*x*y"
-  - "lambda c,x,y: c"
-  - "lambda c,x,y: c"
+  - "lambda c,x: c*x[0]*max(x[0]-1,0)"
+  - "lambda c,x: c*x[0]*x[1]"
+  - "lambda c,x: c"
+  - "lambda c,x: c"
 species:
   - 0
   - 0

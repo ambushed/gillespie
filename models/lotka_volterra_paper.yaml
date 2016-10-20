@@ -7,9 +7,9 @@ parameters:
   - 0.005
   - 0.6
 propensities:
-  - "lambda c,x: np.exp(c)*x[0]"
-  - "lambda c,x: np.exp(c)*x[0]*x[0]"
-  - "lambda c,x: np.exp(c)*x[1]"
+  - "lambda c,x: c*x[0]"
+  - "lambda c,x: c*x[0]*x[0]"
+  - "lambda c,x: c*x[1]"
 species:
   - 50
   - 100
