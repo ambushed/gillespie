@@ -2,60 +2,14 @@ from gillespie import Gillespie
 from gillespie import Setup
 import autograd.numpy as np
 from autograd import value_and_grad
-from autograd.util import flatten_func
+from gillespie.GillespieAdam import adam
 import matplotlib
-import math
 matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
 
 fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
 np.set_printoptions(precision=4)
-
-def adam(grad, init_params, callback=None, num_iters=200,
-         step_size=np.array([0.5,0.5,0.5]), b1=0.9, b2=0.999, eps=10 ** -8):
-
-    """Adam as described in http://arxiv.org/pdf/1412.6980.pdf.
-    It's basically RMSprop with momentum and some correction terms."""
-    flattened_grad, unflatten, x = flatten_func(grad, init_params)
-
-    cost_list = []
-    cost_list.append(1e10)
-    param1 = []
-    param2 = []
-    param3 = []
-    param1.append(init_params[0])
-    param2.append(init_params[1])
-    param3.append(init_params[2])
-    m = np.zeros(len(x))
-    v = np.zeros(len(x))
-    update = 0
-    #step_size[1:] = 0.0
-    for i in range(1,num_iters):
-
-        #if i % 10 == 0:
-        #    step_size*=0.5
-
-        if cost_list[-1] < 5000:
-            break
-
-        g = flattened_grad(x, i)
-        cost = g[0]
-        g = g[1:]
-        m = b1 * g + (1-b1) * m  # First  moment estimate.
-        v = b2 * (g ** 2) + (1- b2) * v  # Second moment estimate.
-        gamma = math.sqrt(1-(1-b2)**i)/(1-(1-b1)**i)
-        print "iteration {} cost {} parameters {} log update {} ".format(i, cost, unflatten(x), update)
-        update = step_size*gamma*m/np.sqrt(i*v)
-        if callback: callback(unflatten(x), i, unflatten(g))
-        x = np.exp(np.log(x) - update)
-        unflattened_x = unflatten(x)
-        cost_list.append(cost)
-        param1.append(unflattened_x[0])
-        param2.append(unflattened_x[1])
-        param3.append(unflattened_x[2])
-
-    return cost_list,param1,param2,param3
 
 def gillespieGradientWalk():
 
@@ -74,15 +28,13 @@ def gillespieGradientWalk():
                              increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
 
     observed_data = my_gillespie.run_simulation(parameters)
-
     starting_parameters = [x for x in parameters]
     idx = 0
     starting_parameters[0] = parameters[0]+parameters[0]*0.2
-    starting_parameters[1] = parameters[1]+parameters[1]*0.2
-    starting_parameters[2] = parameters[2]+parameters[2]*0.2
+    #starting_parameters[1] = parameters[1]+parameters[1]*0.2
+    #starting_parameters[2] = parameters[2]+parameters[2]*0.2
 
     print "{} \n".format(np.array(observed_data[:10]))
-
     parameters = np.array(parameters)
     starting_parameters = np.array(starting_parameters)
 
@@ -97,7 +49,7 @@ def gillespieGradientWalk():
 
     lossFunctionGrad = value_and_grad(lossFunction,idx)
 
-    cost_list,param0,param1,param2 = adam(lossFunctionGrad,starting_parameters, num_iters=3)
+    cost_list,param0,param1,param2 = adam(lossFunctionGrad,starting_parameters, num_iters=200)
 
     fig,(axC, ax0, ax1, ax2) = plt.subplots(nrows=4,sharex=True)
     x = [x for x in range(len(param1))]

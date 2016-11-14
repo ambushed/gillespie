@@ -8,6 +8,7 @@ from autograd import jacobian
 from autograd import primitive
 from pathos.multiprocessing import ProcessingPool as Pool
 
+
 class Gillespie(object):
 
     def __init__(self,species,propensities,increments):
