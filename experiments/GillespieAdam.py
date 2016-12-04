@@ -48,7 +48,7 @@ def gillespieGradientWalk():
         simulated_data = gillespieGrad.run_simulation(np.exp(log_parameters))
 
         #return sum(0.5*(np.array(simulated_data)-np.array(observed_data))**2)
-        return np.sum(np.square( (np.array(simulated_data)-np.array(observed_data))/100.0))
+        return np.log(np.sum(np.square( (np.array(simulated_data)-np.array(observed_data)))))
 
     lossFunctionGrad = value_and_grad(lossFunction,idx)
 
