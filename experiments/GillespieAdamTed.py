@@ -97,7 +97,7 @@ def gillespieGradientWalk(n_iterations):
                              increments=incr,nPaths = nPaths,T=T,useSmoothing=True, seed = seed, numProc = numProc)
 
     observed_data = my_gillespie.run_simulation(parameters)
-    seed += 1
+    #seed += 1
     #starting_parameters = [x for x in log_parameters]
     idx = 0
     #starting_parameters[0] = parameters[0]+parameters[0]*0.2
@@ -132,21 +132,21 @@ def gillespieGradientWalk(n_iterations):
     axC.set_title("Loss")
 
     ax0.plot(x,param0,label="Parameter 0",linewidth=2)
-    ax0.plot(x,p0,label="Actual Value ",linewidth=4)
+    ax0.plot(x,np.log(p0),label="Actual Value ",linewidth=4)
     ax0.set_title("c1:  True = {}, Start = {}, Result = {}".format(initial_log_parameters[0],log_parameters[0],param0[-1]))
 
     ax1.plot(x,param1,label="Parameter 1",linewidth=2)
-    ax1.plot(x,p1,label="Actual Value ",linewidth=4)
+    ax1.plot(x,np.log(p1),label="Actual Value ",linewidth=4)
     ax1.set_title("c2: True = {}, Start = {}, Result = {}".format(initial_log_parameters[1],log_parameters[1],param1[-1]))
 
     ax2.plot(x,param2,label="Parameter 2",linewidth=2)
-    ax2.plot(x,p2,label="Actual Value ",linewidth=4)
+    ax2.plot(x,np.log(p2),label="Actual Value ",linewidth=4)
     ax2.set_title("c3: True = {}, Start = {}, Result = {}".format(initial_log_parameters[2],log_parameters[2],param2[-1]))
 
     plt.savefig("convergence.png")
     plt.show()
 
 if __name__ == "__main__":
-    gillespieGradientWalk(40)
+    gillespieGradientWalk(20)
 
 
